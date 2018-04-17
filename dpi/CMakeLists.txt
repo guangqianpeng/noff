@@ -1,0 +1,13 @@
+if(NOT MUDUO_PATH)
+    if(CMAKE_BUILD_TYPE EQUAL Debug)
+        set(MUDUO_PATH "${CMAKE_HOME_DIRECTORY}/build/debug-install-cpp11")
+    else()
+        set(MUDUO_PATH "${CMAKE_HOME_DIRECTORY}/build/release-install-cpp11")
+    endif()
+endif()
+set(Muduo_INCLUDE_DIR ${MUDUO_PATH}/include)
+
+include_directories(${Muduo_INCLUDE_DIR})
+include_directories(../app/http ../app/dns ../app/mac ../app/protocol)
+aux_source_directory(. SRC)
+add_library(Dpi STATIC ${SRC})

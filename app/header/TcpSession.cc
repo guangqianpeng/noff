@@ -12,15 +12,15 @@ enum {
     upPacketNum,
     upSyn, upFin, upPsh, upRst,
     upSmallPacketNum,
-    upRxmit,
-    upRtt,
+    upRxmitPacketNum,
+    upRtt,     // in milliseconds
 
     downFlowSize,
     downPacketNum,
     downSyn, downFin, downPsh, downRst,
     downSmallPacketNum,
-    downRxmit,
-    downRtt,
+    downRxmitPacketNum,
+    downRtt,    // in milliseconds
 
     totalFieldNum
 };
@@ -226,7 +226,7 @@ void TcpSession::updateSession(const tuple4& t4, const tcphdr& hdr, timeval time
             dataPtr->upSeq_ = dataSeq;
         }
         else if (len > 0) {
-            ++dataPtr->info[upRxmit];
+            ++dataPtr->info[upRxmitPacketNum];
         }
 
         /* update rtt */
@@ -267,7 +267,7 @@ void TcpSession::updateSession(const tuple4& t4, const tcphdr& hdr, timeval time
             dataPtr->downSeq_ = dataSeq;
         }
         else if (len > 0) {
-            ++dataPtr->info[downRxmit];
+            ++dataPtr->info[downRxmitPacketNum];
         }
 
         // rtt

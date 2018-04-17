@@ -1,0 +1,20 @@
+if(NOT MUDUO_PATH)
+    if(CMAKE_BUILD_TYPE EQUAL Debug)
+        set(MUDUO_PATH "${CMAKE_HOME_DIRECTORY}/build/debug-install-cpp11")
+    else()
+        set(MUDUO_PATH "${CMAKE_HOME_DIRECTORY}/build/release-install-cpp11")
+    endif()
+endif()
+set(Muduo_INCLUDE_DIR ${MUDUO_PATH}/include)
+
+add_subdirectory(dns)
+add_subdirectory(http)
+add_subdirectory(https)
+add_subdirectory(mac)
+add_subdirectory(protocol)
+add_subdirectory(header)
+
+include_directories(${Muduo_INCLUDE_DIR})
+
+add_library(App)
+target_link_libraries(App Dns Http Https Mac Protocol Header)

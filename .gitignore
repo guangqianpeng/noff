@@ -4,6 +4,5 @@ cmake-build-release
 build
 .idea
 bin
-CMakeLists.txt
 cloc-1.72.pl
 .vscode
