@@ -21,7 +21,7 @@ using muduo::Thread;
 class Noff: noncopyable
 {
 public:
-    Noff(EventLoop* loop, const std::string& devName);
+    Noff(EventLoop* loop, const std::string& devName, int maxChannel = 16);
     ~Noff();
 
     // bind callbacks and start loops
@@ -61,6 +61,9 @@ private:
     std::vector<InetAddress> tcpHeaderAddress_;
     std::vector<InetAddress> tcpSessionAddress_;
     InetAddress httpsAddress_;
+
+    // max channel
+    const int maxChannel_;
 };
 
 

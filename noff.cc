@@ -306,10 +306,12 @@ void sigHandler(int)
 
 int main(int argc, char** argv)
 {
-    if (argc != 2) {
-        printf("usage: ./noff interface");
+    if (argc < 2) {
+        printf("usage: ./noff interface [#channel]");
         return 0;
     }
+    char* interface = argv[1];
+    int channels = (argc == 3 ? atoi(argv[2]) : 16);
 
     muduo::Logger::setLogLevel(muduo::Logger::INFO);
 
@@ -334,7 +336,7 @@ int main(int argc, char** argv)
     LOG_INFO << "packet counter port " << packetCounterAddr.toPort();
     LOG_INFO << "https packet port " << httpsAddr.toPort();
 
-    Noff noff(&loop, argv[1]);
+    Noff noff(&loop, interface, channels);
     noff.setDnsTopic(dnsRequestAddr, dnsResponseAddr);
     noff.setHttpTopic(httpRequestAddr, httpResponseAddr);
     noff.setTcpHeaderTopic(tcpHeaderAddr);

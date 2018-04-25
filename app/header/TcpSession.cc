@@ -22,8 +22,9 @@ enum {
     downRxmitPacketNum,
     downRtt,    // in milliseconds
 
-    totalFieldNum
+    kTotalFieldNum
 };
+
 
 struct Seq
 {
@@ -67,7 +68,13 @@ struct SessionData
     bool waitingUpAck = false;
     bool waitingDownAck = false;
 
-    std::array<int, totalFieldNum> info = {};
+    std::array<int, kTotalFieldNum> info = {};
+
+
+    const static int kPacketSizeLength = 16;
+    std::array<int, kPacketSizeLength> packetSize = {};
+    int packetCnt = 0;
+
 
     bool normallyClosed_ = true;
 
@@ -95,6 +102,10 @@ std::string to_string(const SessionData& data)
     ret.append(to_string(data.endTime_.tv_sec - data.startTime_.tv_sec));
     ret.append("\t");
     ret.append(to_string(data.normallyClosed_));
+    for (int s: data.packetSize) {
+        ret.append("\t");
+        ret.append(std::to_string(s));
+    }
 
     return ret.append("\n");
 }
@@ -115,7 +126,6 @@ void TcpSession::onTcpData(ip *iphdr, int, timeval timestamp)
     else {
         len -= 4 * tcp->th_off;
     }
-
 
     tuple4 t4(htons(tcp->source),
               htons(tcp->dest),
@@ -205,6 +215,10 @@ void TcpSession::updateSession(const tuple4& t4, const tcphdr& hdr, timeval time
     auto flag = hdr.th_flags;
     Seq dataSeq(ntohl(hdr.seq));
     Seq ackSeq(ntohl(hdr.ack_seq));
+
+    if (len > 0 && dataPtr->packetCnt < SessionData::kPacketSizeLength) {
+        dataPtr->packetSize[dataPtr->packetCnt++] = len;
+    }
 
     if (t4 == dataPtr->t4_) {
         /* up */

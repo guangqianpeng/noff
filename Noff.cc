@@ -187,14 +187,17 @@ void initInThread()
 
 }*/
 
-Noff::Noff(EventLoop *loop, const std::string& devName)
-        : loop_(loop)
+Noff::Noff(EventLoop *loop, const std::string& devName, int maxChannel)
+        : loop_(loop),
+          maxChannel_(maxChannel)
 {
     ring_.resize(MAX_NUM_RX_CHANNELS);
     int n = pfring_open_multichannel(devName.c_str(), 65660,
                                      PF_RING_PROMISC, ring_.data());
     if (n == 0)
         LOG_SYSFATAL << "pfring_open_multichannel(" << devName << ")";
+
+    n = std::min(maxChannel_, n);
 
     ring_.resize(n);
     loops_.resize(n);
@@ -204,8 +207,6 @@ Noff::Noff(EventLoop *loop, const std::string& devName)
             LOG_SYSFATAL << "pfring_enable_ring()";
         }
     }
-    if (n > 16)
-        n = 16;
 
     char name[32];
     for (int i = 0; i < n; ++i) {
