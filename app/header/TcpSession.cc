@@ -98,13 +98,14 @@ std::string to_string(const SessionData& data)
         ret.append("\t");
         ret.append(std::to_string(c));
     }
+
     ret.append("\t");
     ret.append(to_string(data.endTime_.tv_sec - data.startTime_.tv_sec));
     ret.append("\t");
     ret.append(to_string(data.normallyClosed_));
-    for (int s: data.packetSize) {
+    for (int i = 0; i < data.packetCnt; i++) {
         ret.append("\t");
-        ret.append(std::to_string(s));
+        ret.append(std::to_string(data.packetSize[i]));
     }
 
     return ret.append("\n");
@@ -216,12 +217,14 @@ void TcpSession::updateSession(const tuple4& t4, const tcphdr& hdr, timeval time
     Seq dataSeq(ntohl(hdr.seq));
     Seq ackSeq(ntohl(hdr.ack_seq));
 
-    if (len > 0 && dataPtr->packetCnt < SessionData::kPacketSizeLength) {
-        dataPtr->packetSize[dataPtr->packetCnt++] = len;
-    }
+
 
     if (t4 == dataPtr->t4_) {
         /* up */
+
+        if (len > 0 && dataPtr->packetCnt < SessionData::kPacketSizeLength) {
+            dataPtr->packetSize[dataPtr->packetCnt++] = len;
+        }
 
         /* update simple filed */
         dataPtr->info[upFlowSize] += len;
@@ -265,6 +268,10 @@ void TcpSession::updateSession(const tuple4& t4, const tcphdr& hdr, timeval time
     }
     else {
         /* down */
+        if (len > 0 && dataPtr->packetCnt < SessionData::kPacketSizeLength) {
+            dataPtr->packetSize[dataPtr->packetCnt++] = -len;
+        }
+
         dataPtr->info[downFlowSize] += len;
         dataPtr->info[downPacketNum] += 1;
         if (flag & TH_SYN)  ++dataPtr->info[downSyn];

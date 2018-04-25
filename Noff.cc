@@ -273,7 +273,7 @@ void Noff::setPacketCounterTopic(const InetAddress &addr)
 }
 
 void Noff::setHttpsTopic(const InetAddress& addr)
-{ httpsAddress_ = addr; }
+{ setAddress(httpsAddress_, addr, threads_.size()); }
 
 void Noff::runInThread(int index)
 {
@@ -329,7 +329,7 @@ void Noff::runInThread(int index)
     ring.udp().addUdpCallback(bind(
             &ProtocolPacketCounter::onUdpData, packetCounter_.get(), _1, _2, _3, _4));
 
-    Https https(&loop, httpsAddress_);
+    Https https(&loop, httpsAddress_[index]);
     ring.tcpFragment().addDataCallback(std::bind(
             &Https::onTcpData, &https,  _1, _2, _3, _4, _5));
 

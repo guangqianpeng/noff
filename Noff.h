@@ -60,7 +60,7 @@ private:
     std::vector<InetAddress> dnsResponseAddress_;
     std::vector<InetAddress> tcpHeaderAddress_;
     std::vector<InetAddress> tcpSessionAddress_;
-    InetAddress httpsAddress_;
+    std::vector<InetAddress> httpsAddress_;
 
     // max channel
     const int maxChannel_;
