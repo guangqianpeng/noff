@@ -23,5 +23,14 @@ TCP session: **src_ip** | **src_port** | **dst_ip**| **dst_port** |
 
 ./noff interface #channel
 
+端口：
 
-
+| dns request    | 30100 |
+| -------------- | ----- |
+| dns response   | 30200 |
+| http request   | 30300 |
+| http response  | 30400 |
+| tcp header     | 30500 |
+| tcp session    | 30600 |
+| packet counter | 30700 |
+| https          | 30800 |

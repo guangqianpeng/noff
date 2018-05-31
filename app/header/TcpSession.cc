@@ -25,6 +25,10 @@ enum {
     kTotalFieldNum
 };
 
+enum {
+    uploading,
+    downloading
+};
 
 struct Seq
 {
@@ -59,6 +63,10 @@ struct SessionData
     timeval endTime_;
     Seq     upSeq_;
     Seq     downSeq_;
+
+    int direction_ = uploading;
+    int up_bytes = 0;
+    int down_bytes = 0;
 
     // for rtt
     timeval upTimestamp_;
@@ -217,13 +225,19 @@ void TcpSession::updateSession(const tuple4& t4, const tcphdr& hdr, timeval time
     Seq dataSeq(ntohl(hdr.seq));
     Seq ackSeq(ntohl(hdr.ack_seq));
 
-
+    int& direction = dataPtr->direction_;
 
     if (t4 == dataPtr->t4_) {
         /* up */
-
-        if (len > 0 && dataPtr->packetCnt < SessionData::kPacketSizeLength) {
-            dataPtr->packetSize[dataPtr->packetCnt++] = len;
+        if (len > 0) {
+            if (direction == downloading &&
+                dataPtr->packetCnt < SessionData::kPacketSizeLength &&
+                dataPtr->down_bytes > 0) {
+                dataPtr->packetSize[dataPtr->packetCnt++] = -dataPtr->down_bytes;
+                dataPtr->down_bytes = 0;
+            }
+            dataPtr->up_bytes += len;
+            direction = uploading;
         }
 
         /* update simple filed */
@@ -268,8 +282,15 @@ void TcpSession::updateSession(const tuple4& t4, const tcphdr& hdr, timeval time
     }
     else {
         /* down */
-        if (len > 0 && dataPtr->packetCnt < SessionData::kPacketSizeLength) {
-            dataPtr->packetSize[dataPtr->packetCnt++] = -len;
+        if (len > 0) {
+            if (direction == uploading &&
+                dataPtr->packetCnt < SessionData::kPacketSizeLength &&
+                dataPtr->up_bytes > 0) {
+                dataPtr->packetSize[dataPtr->packetCnt++] = dataPtr->up_bytes;
+                dataPtr->up_bytes = 0;
+            }
+            dataPtr->down_bytes += len;
+            direction = downloading;
         }
 
         dataPtr->info[downFlowSize] += len;
@@ -309,6 +330,7 @@ void TcpSession::updateSession(const tuple4& t4, const tcphdr& hdr, timeval time
             dataPtr->waitingDownAck = false;
         }
     }
+
 }
 
 TcpSession::Entry::~Entry()
